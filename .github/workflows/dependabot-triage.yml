@@ -1,0 +1,25 @@
+name: Dependabot triage
+
+# Claude triages every Dependabot PR: risk, other updates needed, and a verdict. Minor and patch PRs it marks
+# safe are approved and auto-merged once required checks pass.
+# Logic lives in priority-digital-health/github-actions (dependabot-triage.yml).
+# Dependabot runs only see Dependabot secrets (Settings -> Secrets and variables -> Dependabot), not Actions secrets.
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  triage:
+    # Only Dependabot's own pushes. Without the actor check, Claude's fix commits would re-trigger Claude.
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]'
+    permissions:
+      contents: write
+      packages: read
+      pull-requests: write
+      id-token: write
+    uses: priority-digital-health/github-actions/.github/workflows/dependabot-triage.yml@main
+    secrets: inherit
